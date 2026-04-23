@@ -1,12 +1,11 @@
 #!/bin/bash
 
 phaseId=$1
-projectId=$2
-specKitPhase=$3
-event=$4
+specKitPhase=$2
+event=$3
 
 tempDir=$(mktemp -d | xargs dirname)
-stateFileName="${phaseId}.${projectId}.${specKitPhase}.json"
+stateFileName="${phaseId}.${specKitPhase}.json"
 stateFilePath="${tempDir}/${stateFileName}"
 
 currentTimestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -18,7 +17,6 @@ if [ "$event" == "started" ]; then
     outputJson=$(cat <<EOF
 {
   "phaseId": "${phaseId}",
-  "projectId": "${projectId}",
   "specKitPhase": "${specKitPhase}",
   "event": "started",
   "timestamp": "${currentTimestamp}",

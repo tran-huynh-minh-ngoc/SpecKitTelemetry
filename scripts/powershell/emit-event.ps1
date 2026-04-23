@@ -1,12 +1,11 @@
 param(
     [string]$phaseId,
-    [string]$projectId,
     [string]$specKitPhase,
     [string]$event
 )
 
 $tempDir = [System.IO.Path]::GetTempPath()
-$stateFileName = "$phaseId.$projectId.$specKitPhase.json"
+$stateFileName = "$phaseId.$specKitPhase.json"
 $stateFilePath = Join-Path $tempDir $stateFileName
 
 $currentTimestamp = (Get-Date).ToUniversalTime()
@@ -14,7 +13,6 @@ $currentTimestamp = (Get-Date).ToUniversalTime()
 if ($event -eq "started") {
     $eventData = @{
         phaseId = $phaseId
-        projectId = $projectId
         specKitPhase = $specKitPhase
         event = "started"
         timestamp = $currentTimestamp.ToString("yyyy-MM-ddTHH:mm:ssZ")

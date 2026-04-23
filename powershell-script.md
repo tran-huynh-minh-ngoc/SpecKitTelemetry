@@ -1,6 +1,6 @@
 This Powershell script should:
 
-- Read the passed arguments in this order: `<phase-id>`, `<project-id>`, `<spec-kit-phase>`, `<event>`
+- Read the passed arguments in this order: `<phase-id>`, `<spec-kit-phase>`, `<event>`
 - If `<event>` is 'started':
     - Create a new state file (json) named `<phase-id>.<project-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments, overwriting existing file if any.
     - Create a json that has the content like this, using values from the arguments, with `<the-current-timestamp>` is the current time in ISO 8601 format in UTC, for example "2026-04-23T02:06:08Z":
