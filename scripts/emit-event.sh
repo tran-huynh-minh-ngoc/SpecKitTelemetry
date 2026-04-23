@@ -7,10 +7,10 @@ workItemId=$2
 specKitPhase=$3
 event=$4
 
-if [[ "$(pwd)" == *".specify/extensions/telemetry/scripts" ]]; then
-    configPath=".specify/extensions/telemetry/scripts/telemetry-config.yml"
-else
+if [[ "$(pwd)" == */scripts ]]; then
     configPath="../telemetry-config.yml"
+else
+    configPath=".specify/extensions/telemetry/scripts/telemetry-config.yml"
 fi
 telemetryConfig=$(yq eval -o json '.' "$configPath")
 projectId=$(echo "$telemetryConfig" | jq -r '.project_id')

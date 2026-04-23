@@ -1,7 +1,7 @@
 This Powershell script should:
 
 - Read the passed arguments in this order: `<phase-id>`, `<work-item-id>`, `<spec-kit-phase>`, `<event>`
-- Read `telemetry-config.yml` into a variable named `telemetryConfig`: if the current directory ends with `.specify/extensions/telemetry/scripts`, read from `.specify/extensions/telemetry/scripts/telemetry-config.yml`, otherwise read from `../telemetry-config.yml`.
+- Read `telemetry-config.yml` into a variable named `telemetryConfig`: if the current directory ends with `/scripts` (or `\scripts` on Windows), read from `../telemetry-config.yml`, otherwise read from `.specify/extensions/telemetry/scripts/telemetry-config.yml`.
 - If `<event>` is 'started':
     - Create a new state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments, overwriting existing file if any.
     - Create a json that has the content like this, using values from the arguments, the values of fields in `telemetryConfig`, with `<the-current-timestamp>` is the current time in ISO 8601 format in UTC, for example "2026-04-23T02:06:08Z":

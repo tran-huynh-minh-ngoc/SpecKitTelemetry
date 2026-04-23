@@ -10,10 +10,10 @@ if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
     Install-Module -Name powershell-yaml -Force -Scope CurrentUser
 }
 
-$configPath = if ((Get-Location).Path.EndsWith(".specify\extensions\telemetry\scripts")) {
-    ".specify/extensions/telemetry/scripts/telemetry-config.yml"
-} else {
+$configPath = if ((Get-Location).Path.EndsWith("\scripts")) {
     "../telemetry-config.yml"
+} else {
+    ".specify/extensions/telemetry/scripts/telemetry-config.yml"
 }
 $telemetryConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Yaml
 
