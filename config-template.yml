@@ -1,0 +1,37 @@
+# SDD Telemetry Extension — per-repo config
+# Copied to .specify/extensions/telemetry/telemetry-config.yml by install.ps1.
+# See specs/POC-sdd-telemetry/contracts/hook-contract.md §Config schema.
+
+# Master toggle (FR-010). When false, SDD commands still run; a single
+# "[telemetry] WARN: disabled" line is printed and no event is emitted.
+enabled: true
+
+# Canonical project identifier. MUST match an active entry in
+# specs/_shared/catalogues/projects.md (r5 / FR-027). Set to "unknown"
+# if you have not decided which catalogue entry this repo binds to;
+# events will still be emitted but flagged for data-quality audit.
+project_id: "unknown"
+
+# Where append-only JSON-Lines events are written. Gitignored.
+events_dir: ".specify/telemetry/events"
+
+# Where per-phase state files live between before_ and after_ hooks.
+# Gitignored.
+state_dir: ".specify/telemetry/state"
+
+# FR-028 — idle threshold for active-time windows, in milliseconds.
+# Default 5 minutes. Two consecutive activities with a gap ≤ this
+# threshold stay in the same window; a larger gap breaks the window
+# and the gap itself is excluded from active_time_ms.
+# See specs/POC-sdd-telemetry/concepts.md §idle_threshold_ms.
+idle_threshold_ms: 300000
+
+# Optional GCS mirror (manual sync only, never on the hot path).
+# Leave bucket empty to disable `speckit.telemetry.sync`.
+gcs:
+  bucket: ""
+  prefix: ""
+
+# Event-schema version the writer pins its output to. v1 is the POC
+# baseline. See contracts/event-schema.md for evolution rules.
+schema_version: 1

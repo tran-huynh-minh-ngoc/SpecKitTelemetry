@@ -1,0 +1,190 @@
+# https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-DEVELOPMENT-GUIDE.md
+schema_version: "1.0"
+# SDD Telemetry Extension manifest
+# Consumed by install.ps1 (and verified against .specify/extensions.yml).
+# See specs/POC-sdd-telemetry/contracts/hook-contract.md §Registration.
+
+extension:
+  id: "telemetry"
+  name: telemetry
+  version: 0.1.0
+  description: Emits SDD phase lifecycle events with human-engagement signals.
+requires:
+  speckit_version: ">=0.5.0"
+provides:
+  commands:
+    - name: "speckit.telemetry.before-constitution"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "started" event for constitution
+      
+    - name: "speckit.telemetry.after-constitution"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for constitution
+      
+    - name: "speckit.telemetry.before-specify"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for specify
+      
+    - name: "speckit.telemetry.after-specify"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for specify
+      
+    - name: "speckit.telemetry.before-clarify"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for clarify
+      
+    - name: "speckit.telemetry.after-clarify"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for clarify
+      
+    - name: "speckit.telemetry.before-plan"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for plan
+      
+    - name: "speckit.telemetry.after-plan"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for plan
+      
+    - name: "speckit.telemetry.before-tasks"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for tasks
+      
+    - name: "speckit.telemetry.after-tasks"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for tasks
+      
+    - name: "speckit.telemetry.before-implement"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for implement
+      
+    - name: "speckit.telemetry.after-implement"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for implement
+      
+    - name: "speckit.telemetry.before-checklist"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for checklist
+      
+    - name: "speckit.telemetry.after-checklist"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for checklist
+      
+    - name: "speckit.telemetry.before-analyze"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for analyze
+      
+    - name: "speckit.telemetry.after-analyze"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for analyze
+      
+    - name: "speckit.telemetry.before-taskstoissues"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for taskstoissues
+      
+    - name: "speckit.telemetry.after-taskstoissues"
+      file: "commands/emit.md"
+      description: Emit SDD telemetry "completed" event for taskstoissues
+
+  config:
+    - name: "telemetry-config.yml"
+      template: "config-template.yml"
+      required: true
+
+# Hook entries below reference per-phase skill wrappers. Each wrapper is a
+# deterministic one-liner that shells to emit-event with baked-in args, so
+# the hook runtime can auto-invoke them without needing to pass arguments
+# through the EXECUTE_COMMAND protocol (which has none).
+#
+# optional: false (mandatory) so the spec-kit hook runtime auto-fires them.
+# The underlying emit-event script is fail-soft and always exits 0 (FR-010),
+# which preserves the additive-telemetry principle even when the hook itself
+# is mandatory at the runtime layer.
+hooks:
+  before_constitution:
+    command: speckit.telemetry.before-constitution
+    optional: false
+
+  after_constitution:
+    command: speckit.telemetry.after-constitution
+    optional: false
+
+  before_specify:
+    command: speckit.telemetry.before-specify
+    optional: false
+    description: Emit SDD telemetry "started" event for specify
+
+  after_specify:
+    command: speckit.telemetry.after-specify
+    optional: false
+    description: Emit SDD telemetry "completed" event for specify
+
+  before_clarify:
+    command: speckit.telemetry.before-clarify
+    optional: false
+    description: Emit SDD telemetry "started" event for clarify
+
+  after_clarify:
+    command: speckit.telemetry.after-clarify
+    optional: false
+    description: Emit SDD telemetry "completed" event for clarify
+
+  before_plan:
+    command: speckit.telemetry.before-plan
+    optional: false
+    description: Emit SDD telemetry "started" event for plan
+
+  after_plan:
+    command: speckit.telemetry.after-plan
+    optional: false
+    description: Emit SDD telemetry "completed" event for plan
+
+  before_tasks:
+    command: speckit.telemetry.before-tasks
+    optional: false
+    description: Emit SDD telemetry "started" event for tasks
+
+  after_tasks:
+    command: speckit.telemetry.after-tasks
+    optional: false
+    description: Emit SDD telemetry "completed" event for tasks
+
+  before_implement:
+    command: speckit.telemetry.before-implement
+    optional: false
+    description: Emit SDD telemetry "started" event for implement
+
+  after_implement:
+    command: speckit.telemetry.after-implement
+    optional: false
+    description: Emit SDD telemetry "completed" event for implement
+
+  before_checklist:
+    command: speckit.telemetry.before-checklist
+    optional: false
+    description: Emit SDD telemetry "started" event for checklist
+
+  after_checklist:
+    command: speckit.telemetry.after-checklist
+    optional: false
+    description: Emit SDD telemetry "completed" event for checklist
+
+  before_analyze:
+    command: speckit.telemetry.before-analyze
+    optional: false
+    description: Emit SDD telemetry "started" event for analyze
+
+  after_analyze:
+    command: speckit.telemetry.after-analyze
+    optional: false
+    description: Emit SDD telemetry "completed" event for analyze
+
+  before_taskstoissues:
+    command: speckit.telemetry.before-taskstoissues
+    optional: false
+    description: Emit SDD telemetry "started" event for taskstoissues
+
+  after_taskstoissues:
+    command: speckit.telemetry.after-taskstoissues
+    optional: false
+    description: Emit SDD telemetry "completed" event for taskstoissues
+
