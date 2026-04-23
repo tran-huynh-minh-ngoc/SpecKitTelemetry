@@ -4,59 +4,91 @@ param(
     [string]$specKitPhase,
     [string]$event
 )
-
 $ErrorActionPreference = "Stop"
 
-$telemetryConfig = Get-Content -Path "telemetry-config.yml" -Raw | ConvertFrom-Yaml
+if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
+    Install-Module -Name powershell-yaml -Force -Scope CurrentUser
+}
+
+$telemetryConfig = Get-Content -Path "../telemetry-config.yml" -Raw | ConvertFrom-Yaml
 
 $tempDir = [System.IO.Path]::GetTempPath()
-$stateFileName = "$phaseId.$specKitPhase.json"
-$stateFilePath = Join-Path $tempDir $stateFileName
+$stateFilePath = Join-Path $tempDir "$phaseId.$specKitPhase.json"
 $currentTimestamp = (Get-Date).ToUniversalTime()
-$yearMonth = $currentTimestamp.ToString("yyyy-MM")
-$reportDir = Join-Path $telemetryConfig.events_dir $yearMonth
+$reportDir = Join-Path $telemetryConfig.events_dir $currentTimestamp.ToString("yyyy-MM")
 $reportFilePath = Join-Path $reportDir "report.jsonl"
+
+function SaveStateFile($json) {
+    $json | Out-File -FilePath $stateFilePath -Encoding UTF8 -Force
+}
+
+function ReportEvent($eventData, $saveState = $true) {
+    New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+    $json = $eventData | ConvertTo-Json -Compress
+    if ($saveState) {
+        SaveStateFile $json
+    }
+    Add-Content -Path $reportFilePath -Value $json -Encoding UTF8
+    Write-Output $json
+}
+
+function DeleteStateFile {
+    Remove-Item -Path $stateFilePath -Force
+}
 
 if ($event -eq "started") {
     $eventData = @{
-        id = [guid]::NewGuid().ToString()
-        phaseId = $phaseId
-        workItemId = $workItemId
-        projectId = $telemetryConfig.project_id
-        specKitPhase = $specKitPhase
-        event = "started"
-        timestamp = $currentTimestamp.ToString("yyyy-MM-ddTHH:mm:ssZ")
-        metrics = @{
-            numberOfAiToolCall = 0
-            numberOfHumanInteraction = 0
+        event_id = [guid]::NewGuid().ToString()
+        phase_id = $phaseId
+        work_item_id = $workItemId
+        project_id = $telemetryConfig.project_id
+        phase = $specKitPhase
+        event_type = "started"
+        timestamp_utc = $currentTimestamp
+        invocation_seq = 1
+        invocation_kind = "initial"
+        signals = @{
+            duration_ms = 0
+            ai_tool_use_count = 0
+            user_turn_count = 0
+            artifact_change_count = 0
+            active_time_ms = 0
+            idle_threshold_ms_at_capture = 300000
         }
     }
-
-    $outputJson = $eventData | ConvertTo-Json -Compress
-    $outputJson | Out-File -FilePath $stateFilePath -Encoding UTF8 -Force
-
-    if (-not (Test-Path -Path $reportDir)) {
-        New-Item -ItemType Directory -Path $reportDir | Out-Null
-    }
-    Add-Content -Path $reportFilePath -Value $outputJson -Encoding UTF8
-    Write-Output $outputJson
-}
-elseif ($event -eq "completed") {
-    $json = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
-
-    $startTime = $json.timestamp
-    $duration = [int](($currentTimestamp - $startTime).TotalMilliseconds)
-
-    $json.event = "completed"
-    $json.timestamp = $currentTimestamp.ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $json.metrics | Add-Member -NotePropertyName "duration" -NotePropertyValue $duration
-
-    $outputJson = $json | ConvertTo-Json -Compress
-
-    if (-not (Test-Path -Path $reportDir)) {
-        New-Item -ItemType Directory -Path $reportDir | Out-Null
-    }
-    Add-Content -Path $reportFilePath -Value $outputJson -Encoding UTF8
-    Write-Output $outputJson
-    Remove-Item -Path $stateFilePath -Force
+    ReportEvent $eventData
+} elseif ($event -eq "suspended") {
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData.event_id = [guid]::NewGuid().ToString()
+    $eventData.event_type = "suspended"
+    $eventData.signals.duration_ms = [int](($currentTimestamp - $eventData.timestamp_utc).TotalMilliseconds)
+    $eventData.timestamp_utc = $currentTimestamp
+    ReportEvent $eventData
+} elseif ($event -eq "resumed") {
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData.event_id = [guid]::NewGuid().ToString()
+    $eventData.invocation_seq++
+    $eventData.signals.user_turn_count++
+    $eventData.invocation_kind = "refinement"
+    $eventData.event_type = "resumed"
+    $eventData.timestamp_utc = $currentTimestamp
+    ReportEvent $eventData
+} elseif ($event -eq "ai_tool_called") {
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData.signals.ai_tool_use_count++
+    $json = $eventData | ConvertTo-Json -Compress
+    SaveStateFile $json
+} elseif ($event -eq "artifact_changed") {
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData.signals.artifact_change_count++
+    $json = $eventData | ConvertTo-Json -Compress
+    SaveStateFile $json
+} elseif ($event -eq "completed") {
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData.event_id = [guid]::NewGuid().ToString()
+    $eventData.event_type = "completed"
+    $eventData.signals.duration_ms = [int](($currentTimestamp - $eventData.timestamp_utc).TotalMilliseconds)
+    $eventData.timestamp_utc = $currentTimestamp
+    ReportEvent $eventData false
+    DeleteStateFile
 }
