@@ -6,19 +6,23 @@ phaseId=$1
 specKitPhase=$2
 event=$3
 
+projectId=$(yq '.project_id' telemetry-config.yml)
+eventsDir=$(yq '.events_dir' telemetry-config.yml)
+
 tempDir=$(mktemp -d | xargs dirname)
 stateFileName="${phaseId}.${specKitPhase}.json"
 stateFilePath="${tempDir}/${stateFileName}"
 
 currentTimestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 yearMonth=$(date -u +"%Y-%m")
-reportDir="./reports/telemetry/${yearMonth}"
+reportDir="${eventsDir}/${yearMonth}"
 reportFilePath="${reportDir}/report.jsonl"
 
 if [ "$event" == "started" ]; then
     outputJson=$(cat <<EOF
 {
   "phaseId": "${phaseId}",
+  "projectId": "${projectId}",
   "specKitPhase": "${specKitPhase}",
   "event": "started",
   "timestamp": "${currentTimestamp}",
@@ -38,11 +42,6 @@ EOF
     echo "$minified"
 
 elif [ "$event" == "completed" ]; then
-    if [ ! -f "$stateFilePath" ]; then
-        echo "Error: State file not found: $stateFilePath" >&2
-        exit 1
-    fi
-
     startTime=$(jq -r '.timestamp' "$stateFilePath")
     startTimeEpoch=$(date -d "$startTime" +%s%3N 2>/dev/null || date -jf "%Y-%m-%dT%H:%M:%SZ" "$startTime" +%s%3N)
     currentTimeEpoch=$(date -u +%s%3N)

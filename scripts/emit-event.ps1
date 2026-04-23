@@ -1,22 +1,28 @@
 param(
     [string]$phaseId,
+    [string]$workItemId,
     [string]$specKitPhase,
     [string]$event
 )
 
 $ErrorActionPreference = "Stop"
 
+$telemetryConfig = Get-Content -Path "telemetry-config.yml" -Raw | ConvertFrom-Yaml
+
 $tempDir = [System.IO.Path]::GetTempPath()
 $stateFileName = "$phaseId.$specKitPhase.json"
 $stateFilePath = Join-Path $tempDir $stateFileName
 $currentTimestamp = (Get-Date).ToUniversalTime()
 $yearMonth = $currentTimestamp.ToString("yyyy-MM")
-$reportDir = Join-Path $pwd "reports/telemetry/$yearMonth"
+$reportDir = Join-Path $telemetryConfig.events_dir $yearMonth
 $reportFilePath = Join-Path $reportDir "report.jsonl"
 
 if ($event -eq "started") {
     $eventData = @{
+        id = [guid]::NewGuid().ToString()
         phaseId = $phaseId
+        workItemId = $workItemId
+        projectId = $telemetryConfig.project_id
         specKitPhase = $specKitPhase
         event = "started"
         timestamp = $currentTimestamp.ToString("yyyy-MM-ddTHH:mm:ssZ")
@@ -36,13 +42,7 @@ if ($event -eq "started") {
     Write-Output $outputJson
 }
 elseif ($event -eq "completed") {
-    try {
-        $json = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
-    }
-    catch [System.Management.Automation.ItemNotFoundException] {
-        Write-Error "State file not found: $stateFilePath"
-        exit 1
-    }
+    $json = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
 
     $startTime = $json.timestamp
     $duration = [int](($currentTimestamp - $startTime).TotalMilliseconds)
