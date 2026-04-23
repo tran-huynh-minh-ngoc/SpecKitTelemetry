@@ -13,7 +13,7 @@ if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
 $configPath = if ((Get-Location).Path.EndsWith("\scripts")) {
     "../telemetry-config.yml"
 } else {
-    ".specify/extensions/telemetry/scripts/telemetry-config.yml"
+    ".specify/extensions/telemetry/telemetry-config.yml"
 }
 $telemetryConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Yaml
 

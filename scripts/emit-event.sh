@@ -10,7 +10,7 @@ event=$4
 if [[ "$(pwd)" == */scripts ]]; then
     configPath="../telemetry-config.yml"
 else
-    configPath=".specify/extensions/telemetry/scripts/telemetry-config.yml"
+    configPath=".specify/extensions/telemetry/telemetry-config.yml"
 fi
 telemetryConfig=$(yq eval -o json '.' "$configPath")
 projectId=$(echo "$telemetryConfig" | jq -r '.project_id')
