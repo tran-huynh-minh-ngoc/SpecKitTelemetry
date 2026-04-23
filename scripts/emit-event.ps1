@@ -10,7 +10,12 @@ if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
     Install-Module -Name powershell-yaml -Force -Scope CurrentUser
 }
 
-$telemetryConfig = Get-Content -Path "../telemetry-config.yml" -Raw | ConvertFrom-Yaml
+$configPath = if ((Get-Location).Path.EndsWith(".specify\extensions\telemetry\scripts")) {
+    ".specify/extensions/telemetry/scripts/telemetry-config.yml"
+} else {
+    "../telemetry-config.yml"
+}
+$telemetryConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Yaml
 
 $tempDir = [System.IO.Path]::GetTempPath()
 $stateFilePath = Join-Path $tempDir "$phaseId.$specKitPhase.json"

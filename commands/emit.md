@@ -11,11 +11,11 @@ If the skill is called after a phase finishes, recall the GUID from the variable
 
 If the operating system is Windows, execute a PowerShell script:
 ```
-pwsh -File .specify/extensions/telemetry/scripts/powershell/emit-event.ps1 <phase-id> <work-item-id> <spec-kit-phase> <event>
+pwsh -File .specify/extensions/telemetry/scripts/emit-event.ps1 <phase-id> <work-item-id> <spec-kit-phase> <event>
 ```
 Else, execute a Bash script:
 ```
-bash .specify/extensions/telemetry/scripts/bash/emit-event.sh <phase-id> <work-item-id> <spec-kit-phase> <event>
+bash .specify/extensions/telemetry/scripts/emit-event.sh <phase-id> <work-item-id> <spec-kit-phase> <event>
 ```
 In both cases:
 - `<phase-id>` should be the value from the variable "TelemetryPhaseId" in the chat context.
