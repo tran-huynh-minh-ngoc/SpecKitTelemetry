@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 phaseId=$1
 specKitPhase=$2
 event=$3
@@ -10,7 +12,7 @@ stateFilePath="${tempDir}/${stateFileName}"
 
 currentTimestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 yearMonth=$(date -u +"%Y-%m")
-reportDir="./${yearMonth}"
+reportDir="./reports/telemetry/${yearMonth}"
 reportFilePath="${reportDir}/report.jsonl"
 
 if [ "$event" == "started" ]; then
@@ -28,15 +30,17 @@ if [ "$event" == "started" ]; then
 EOF
 )
 
-    echo "$outputJson" | jq -c '.' > "$stateFilePath"
+    minified=$(echo "$outputJson" | jq -c '.')
+    echo "$minified" > "$stateFilePath"
 
     mkdir -p "$reportDir"
-    echo "$outputJson" | jq -c '.' >> "$reportFilePath"
-    echo "$outputJson" | jq -c '.'
+    echo "$minified" >> "$reportFilePath"
+    echo "$minified"
 
 elif [ "$event" == "completed" ]; then
     if [ ! -f "$stateFilePath" ]; then
-        exit 0
+        echo "Error: State file not found: $stateFilePath" >&2
+        exit 1
     fi
 
     startTime=$(jq -r '.timestamp' "$stateFilePath")
@@ -44,12 +48,12 @@ elif [ "$event" == "completed" ]; then
     currentTimeEpoch=$(date -u +%s%3N)
     duration=$((currentTimeEpoch - startTimeEpoch))
 
-    outputJson=$(jq --arg event "completed" --arg timestamp "$currentTimestamp" --arg duration "$duration" \
+    minified=$(jq -c --arg event "completed" --arg timestamp "$currentTimestamp" --arg duration "$duration" \
         '.event = $event | .timestamp = $timestamp | .metrics.duration = ($duration | tonumber)' "$stateFilePath")
 
     mkdir -p "$reportDir"
-    echo "$outputJson" | jq -c '.' >> "$reportFilePath"
-    echo "$outputJson" | jq -c '.'
+    echo "$minified" >> "$reportFilePath"
+    echo "$minified"
 
     rm -f "$stateFilePath"
 fi

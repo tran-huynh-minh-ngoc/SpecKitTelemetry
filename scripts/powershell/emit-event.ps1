@@ -4,11 +4,15 @@ param(
     [string]$event
 )
 
+$ErrorActionPreference = "Stop"
+
 $tempDir = [System.IO.Path]::GetTempPath()
 $stateFileName = "$phaseId.$specKitPhase.json"
 $stateFilePath = Join-Path $tempDir $stateFileName
-
 $currentTimestamp = (Get-Date).ToUniversalTime()
+$yearMonth = $currentTimestamp.ToString("yyyy-MM")
+$reportDir = Join-Path $pwd "reports/telemetry/$yearMonth"
+$reportFilePath = Join-Path $reportDir "report.jsonl"
 
 if ($event -eq "started") {
     $eventData = @{
@@ -25,13 +29,9 @@ if ($event -eq "started") {
     $outputJson = $eventData | ConvertTo-Json -Compress
     $outputJson | Out-File -FilePath $stateFilePath -Encoding UTF8 -Force
 
-    $yearMonth = $currentTimestamp.ToString("yyyy-MM")
-    $reportDir = Join-Path $pwd $yearMonth
     if (-not (Test-Path -Path $reportDir)) {
         New-Item -ItemType Directory -Path $reportDir | Out-Null
     }
-    $reportFilePath = Join-Path $reportDir "report.jsonl"
-
     Add-Content -Path $reportFilePath -Value $outputJson -Encoding UTF8
     Write-Output $outputJson
 }
@@ -40,7 +40,8 @@ elseif ($event -eq "completed") {
         $json = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
     }
     catch [System.Management.Automation.ItemNotFoundException] {
-        exit
+        Write-Error "State file not found: $stateFilePath"
+        exit 1
     }
 
     $startTime = $json.timestamp
@@ -52,13 +53,9 @@ elseif ($event -eq "completed") {
 
     $outputJson = $json | ConvertTo-Json -Compress
 
-    $yearMonth = $currentTimestamp.ToString("yyyy-MM")
-    $reportDir = Join-Path $pwd $yearMonth
     if (-not (Test-Path -Path $reportDir)) {
         New-Item -ItemType Directory -Path $reportDir | Out-Null
     }
-    $reportFilePath = Join-Path $reportDir "report.jsonl"
-
     Add-Content -Path $reportFilePath -Value $outputJson -Encoding UTF8
     Write-Output $outputJson
     Remove-Item -Path $stateFilePath -Force
