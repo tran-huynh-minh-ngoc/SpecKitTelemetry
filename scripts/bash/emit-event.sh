@@ -15,7 +15,7 @@ reportDir="./${yearMonth}"
 reportFilePath="${reportDir}/report.jsonl"
 
 if [ "$event" == "started" ]; then
-    eventData=$(cat <<EOF
+    outputJson=$(cat <<EOF
 {
   "phaseId": "${phaseId}",
   "projectId": "${projectId}",
@@ -30,10 +30,11 @@ if [ "$event" == "started" ]; then
 EOF
 )
 
-    echo "$eventData" | jq -c '.' > "$stateFilePath"
+    echo "$outputJson" | jq -c '.' > "$stateFilePath"
 
     mkdir -p "$reportDir"
-    echo "$eventData" | jq -c '.' >> "$reportFilePath"
+    echo "$outputJson" | jq -c '.' >> "$reportFilePath"
+    echo "$outputJson" | jq -c '.'
 
 elif [ "$event" == "completed" ]; then
     if [ ! -f "$stateFilePath" ]; then
@@ -45,11 +46,12 @@ elif [ "$event" == "completed" ]; then
     currentTimeEpoch=$(date -u +%s%3N)
     duration=$((currentTimeEpoch - startTimeEpoch))
 
-    json=$(jq --arg event "completed" --arg timestamp "$currentTimestamp" --arg duration "$duration" \
+    outputJson=$(jq --arg event "completed" --arg timestamp "$currentTimestamp" --arg duration "$duration" \
         '.event = $event | .timestamp = $timestamp | .metrics.duration = ($duration | tonumber)' "$stateFilePath")
 
     mkdir -p "$reportDir"
-    echo "$json" | jq -c '.' >> "$reportFilePath"
+    echo "$outputJson" | jq -c '.' >> "$reportFilePath"
+    echo "$outputJson" | jq -c '.'
 
     rm -f "$stateFilePath"
 fi

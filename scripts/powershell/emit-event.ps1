@@ -24,8 +24,8 @@ if ($event -eq "started") {
         }
     }
 
-    $json = $eventData | ConvertTo-Json -Compress
-    $json | Out-File -FilePath $stateFilePath -Encoding UTF8 -Force
+    $outputJson = $eventData | ConvertTo-Json -Compress
+    $outputJson | Out-File -FilePath $stateFilePath -Encoding UTF8 -Force
 
     $yearMonth = $currentTimestamp.ToString("yyyy-MM")
     $reportDir = Join-Path $pwd $yearMonth
@@ -34,7 +34,8 @@ if ($event -eq "started") {
     }
     $reportFilePath = Join-Path $reportDir "report.jsonl"
 
-    Add-Content -Path $reportFilePath -Value $json -Encoding UTF8
+    Add-Content -Path $reportFilePath -Value $outputJson -Encoding UTF8
+    Write-Output $outputJson
 }
 elseif ($event -eq "completed") {
     try {
@@ -51,7 +52,7 @@ elseif ($event -eq "completed") {
     $json.timestamp = $currentTimestamp.ToString("yyyy-MM-ddTHH:mm:ssZ")
     $json.metrics | Add-Member -NotePropertyName "duration" -NotePropertyValue $duration
 
-    $minifiedJson = $json | ConvertTo-Json -Compress
+    $outputJson = $json | ConvertTo-Json -Compress
 
     $yearMonth = $currentTimestamp.ToString("yyyy-MM")
     $reportDir = Join-Path $pwd $yearMonth
@@ -60,6 +61,7 @@ elseif ($event -eq "completed") {
     }
     $reportFilePath = Join-Path $reportDir "report.jsonl"
 
-    Add-Content -Path $reportFilePath -Value $minifiedJson -Encoding UTF8
+    Add-Content -Path $reportFilePath -Value $outputJson -Encoding UTF8
+    Write-Output $outputJson
     Remove-Item -Path $stateFilePath -Force
 }
