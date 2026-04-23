@@ -1,43 +1,25 @@
-# speckit.telemetry.emit
+# Emit telemetry for Spec-kit
 
-Two sub-commands share this entrypoint:
+This skill should be invoked automatically before or after a phase in Spec-kit. The yml file .specify/extensions/telemetry/extension.yml already defines what phases and the time before or after a phase that this skill should be invoked.
 
-## `speckit.telemetry.emit <phase> <event_type>`
+If the skill is called before a phase starts, the event should be "started"; if the skill is called after a phase finishes, the event should be "completed".
 
-Invoked by the spec-kit hook runtime on `before_<phase>` and `after_<phase>`.
-Writes one v1 JSON line to `.specify/telemetry/events/YYYY-MM.jsonl`.
+## Execution
+If the skill is called before a phase starts, generate a GUID and remember it in a variable named "TelemetryPhaseId".
 
-- `<phase>`: one of `constitution` / `specify` / `clarify` / `plan` / `tasks` / `implement` / `checklist` / `analyze` / `taskstoissues`
-- `<event_type>`: `started` / `completed` / `aborted`
+If the skill is called after a phase finishes, recall the GUID from the variable "TelemetryPhaseId".
 
-Shell out to whichever script flavour is installed:
+If the operating system is Windows, execute a PowerShell script:
+```
+pwsh -File .specify/extensions/telemetry/scripts/powershell/emit-event.ps1 <phase-id> <spec-kit-phase> <event>
+```
+Else, execute a Bash script:
+```
+bash .specify/extensions/telemetry/scripts/bash/emit-event.sh <phase-id> <spec-kit-phase> <event>
+```
+In both cases:
+- `<phase-id>` should be the value from the variable "TelemetryPhaseId"
+- `<spec-kit-phase>` is the name of the spec-kit phases, it should be one of 'constitution', 'specify', 'clarify', 'plan', 'tasks', 'implement', 'checklist', 'analyze', 'taskstoissues' depending on what phase is running.
+- `<event>` should be 'started' or 'completed', if the skill is called before a phase starts then it should be 'started', if the skill is called after a phase finishes then it should be 'completed'.
 
-- PowerShell: `pwsh -File .specify/extensions/telemetry/scripts/powershell/emit-event.ps1 <phase> <event_type>`
-- Bash: `bash .specify/extensions/telemetry/scripts/bash/emit-event.sh <phase> <event_type>`
-
-## `speckit.telemetry.emit record-activity <phase> <activity_type>`
-
-Invoked by the AI assistant during a phase, once per user_turn received and
-once per ai_tool_use emitted. Appends a timestamped record to the current
-phase's state file so the Active Window Computer can compute `active_time_ms`
-at `after_<phase>`.
-
-- `<phase>`: same enum as above (the currently active phase)
-- `<activity_type>`: `user_turn` or `ai_tool_use`
-
-Shell out:
-
-- PowerShell: `pwsh -File .specify/extensions/telemetry/scripts/powershell/record-activity.ps1 <phase> <activity_type>`
-- Bash: `bash .specify/extensions/telemetry/scripts/bash/record-activity.sh <phase> <activity_type>`
-
-## Contract
-
-Both sub-commands:
-
-- Always exit `0` (FR-010 additive-telemetry principle).
-- Never write PII, user-prompt text, or artefact content — only metadata.
-- Emit `[telemetry] WARN:` to stderr on any internal failure, never block
-  the underlying SDD command or AI workflow.
-
-See the full contract at
-[`specs/POC-sdd-telemetry/contracts/hook-contract.md`](../../../specs/POC-sdd-telemetry/contracts/hook-contract.md).
+If the skill is called after a phase finishes, after executing the Powershell script or the Bash script, forget the variable "TelemetryPhaseId".
