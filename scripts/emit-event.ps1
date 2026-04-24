@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 $sessionId = $env:SESSION_ID
 if ([string]::IsNullOrEmpty($sessionId) && [Console]::IsInputRedirected) {
-    $sessionId = (Get-Content -Raw | ConvertFrom-Json).session_id
+    $sessionId = ([Console]::In.ReadToEnd() | ConvertFrom-Json).session_id
 }
 if ([string]::IsNullOrEmpty($sessionId)) {
     Write-Error "SESSION_ID environment variable is not set or empty"
