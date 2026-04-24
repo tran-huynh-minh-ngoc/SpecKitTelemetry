@@ -6,6 +6,15 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
+$sessionId = $env:SESSION_ID
+if ([string]::IsNullOrEmpty($sessionId) && [Console]::IsInputRedirected) {
+    $sessionId = (Get-Content -Raw | ConvertFrom-Json).session_id
+}
+if ([string]::IsNullOrEmpty($sessionId)) {
+    Write-Error "SESSION_ID environment variable is not set or empty"
+    exit 1
+}
+
 if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
     Install-Module -Name powershell-yaml -Force -Scope CurrentUser
 }
@@ -16,12 +25,6 @@ $configPath = if ((Get-Location).Path.EndsWith("\scripts")) {
     ".specify/extensions/telemetry/telemetry-config.yml"
 }
 $telemetryConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Yaml
-
-$sessionId = $env:SESSION_ID
-if ([string]::IsNullOrEmpty($sessionId)) {
-    Write-Error "SESSION_ID environment variable is not set or empty"
-    exit 1
-}
 $tempDir = [System.IO.Path]::GetTempPath()
 $stateFilePath = Join-Path $tempDir "SpecKitTelemetry.$sessionId.json"
 $currentTimestamp = (Get-Date).ToUniversalTime()

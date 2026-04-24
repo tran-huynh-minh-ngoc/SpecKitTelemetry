@@ -4,7 +4,9 @@ This Powershell script should:
 - `<phase-id>`, `<work-item-id>` and `<spec-kit-phase>` are only mandatory when `<event>` is `started`, they have no effect when `<event>` is anything else.
 - Read `telemetry-config.yml` into a variable named `telemetryConfig`: if the current directory ends with `/scripts` (or `\scripts` on Windows), read from `../telemetry-config.yml`, otherwise read from `.specify/extensions/telemetry/telemetry-config.yml`.
 - Get `session_id` from the environment variable `SESSION_ID`.
-- If `SESSION_ID` is not available, log error then exit.
+- If `SESSION_ID` is not available:
+    - If stdin is redirected, parse a JSON object from stdin and read `session_id` from that object. (Only for Powershell script)
+    - If stdin is not redirected or `session_id` is null or empty, log error then exit.
 
 - If `<event>` is `started`:
     - Create a new state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, overwriting existing file if any.
