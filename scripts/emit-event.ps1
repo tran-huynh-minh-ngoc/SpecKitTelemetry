@@ -1,8 +1,8 @@
 param(
+    [string]$event,
     [string]$phaseId,
     [string]$workItemId,
-    [string]$specKitPhase,
-    [string]$event
+    [string]$specKitPhase
 )
 $ErrorActionPreference = "Stop"
 
@@ -17,8 +17,13 @@ $configPath = if ((Get-Location).Path.EndsWith("\scripts")) {
 }
 $telemetryConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Yaml
 
+$sessionId = $env:SESSION_ID
+if ([string]::IsNullOrEmpty($sessionId)) {
+    Write-Error "SESSION_ID environment variable is not set or empty"
+    exit 1
+}
 $tempDir = [System.IO.Path]::GetTempPath()
-$stateFilePath = Join-Path $tempDir "$phaseId.$specKitPhase.json"
+$stateFilePath = Join-Path $tempDir "SpecKitTelemetry.$sessionId.json"
 $currentTimestamp = (Get-Date).ToUniversalTime()
 $reportDir = Join-Path $telemetryConfig.events_dir $currentTimestamp.ToString("yyyy-MM")
 $reportFilePath = Join-Path $reportDir "report.jsonl"
@@ -74,6 +79,7 @@ if ($event -eq "started") {
     $eventData.event_id = [guid]::NewGuid().ToString()
     $eventData.invocation_seq++
     $eventData.signals.user_turn_count++
+    $eventData.signals.duration_ms = 0
     $eventData.invocation_kind = "refinement"
     $eventData.event_type = "resumed"
     $eventData.timestamp_utc = $currentTimestamp

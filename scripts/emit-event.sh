@@ -1,11 +1,21 @@
 #!/bin/bash
-
 set -e
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*|Windows_NT)
+    pwsh -NoProfile -File "$(dirname "$0")/emit-event.ps1" "$@"
+    exit $?
+    ;;
+esac
 
-phaseId=$1
-workItemId=$2
-specKitPhase=$3
-event=$4
+event=$1
+phaseId=$2
+workItemId=$3
+specKitPhase=$4
+
+if [ -z "$SESSION_ID" ]; then
+    echo "Error: SESSION_ID environment variable is not set or empty" >&2
+    exit 1
+fi
 
 if [[ "$(pwd)" == */scripts ]]; then
     configPath="../telemetry-config.yml"
@@ -17,7 +27,7 @@ projectId=$(echo "$telemetryConfig" | jq -r '.project_id')
 eventsDir=$(echo "$telemetryConfig" | jq -r '.events_dir')
 
 tempDir=$(mktemp -d | xargs dirname)
-stateFilePath="${tempDir}/${phaseId}.${specKitPhase}.json"
+stateFilePath="${tempDir}/SpecKitTelemetry.${SESSION_ID}.json"
 currentTimestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 reportDir="${eventsDir}/$(date -u +"%Y-%m")"
 reportFilePath="${reportDir}/report.jsonl"
@@ -86,7 +96,7 @@ elif [ "$event" = "resumed" ]; then
     eventData=$(echo "$eventData" | jq \
         --arg event_id "$(uuidgen)" \
         --arg timestamp_utc "$currentTimestamp" \
-        '.event_id = $event_id | .invocation_seq += 1 | .signals.user_turn_count += 1 | .invocation_kind = "refinement" | .event_type = "resumed" | .timestamp_utc = $timestamp_utc')
+        '.event_id = $event_id | .invocation_seq += 1 | .signals.user_turn_count += 1 | .signals.duration_ms = 0 | .invocation_kind = "refinement" | .event_type = "resumed" | .timestamp_utc = $timestamp_utc')
     ReportEvent "$eventData"
 
 elif [ "$event" = "ai_tool_called" ]; then

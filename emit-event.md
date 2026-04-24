@@ -1,9 +1,13 @@
 This Powershell script should:
 
-- Read the passed arguments in this order: `<phase-id>`, `<work-item-id>`, `<spec-kit-phase>`, `<event>`
+- Read the passed arguments in this order:  `<event>`, `<phase-id>`, `<work-item-id>`, `<spec-kit-phase>`
+- `<phase-id>`, `<work-item-id>` and `<spec-kit-phase>` are only mandatory when `<event>` is `started`, they have no effect when `<event>` is anything else.
 - Read `telemetry-config.yml` into a variable named `telemetryConfig`: if the current directory ends with `/scripts` (or `\scripts` on Windows), read from `../telemetry-config.yml`, otherwise read from `.specify/extensions/telemetry/telemetry-config.yml`.
-- If `<event>` is 'started':
-    - Create a new state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments, overwriting existing file if any.
+- Get `session_id` from the environment variable `SESSION_ID`.
+- If `SESSION_ID` is not available, log error then exit.
+
+- If `<event>` is `started`:
+    - Create a new state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, overwriting existing file if any.
     - Create a json that has the content like this, using values from the arguments, the values of fields in `telemetryConfig`, with `<the-current-timestamp>` is the current time in ISO 8601 format in UTC, for example "2026-04-23T02:06:08Z":
     ```json
     {
@@ -31,7 +35,7 @@ This Powershell script should:
     - Log the json to the console
 
 - If `<event>` is `suspended`:
-    - Read the state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments.
+    - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
     - Assign new guid to the field `event_id` in json
     - Calculate the current timestamp
     - Calculate the duration in milliseconds by current timestamp minus the timestamp_utc in the json state file
@@ -43,10 +47,11 @@ This Powershell script should:
     - Log the json to the console
 
 - If `<event>` is `resumed`:
-    - Read the state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments.
+    - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
     - Assign new guid to the field `event_id` in json
     - Increase the value of the field `invocation_seq` by one
     - Increase the value of the field `signals.user_turn_count` by one
+    - Assign zero to the field `signals.duration_ms`
     - Assign the value `refinement` into the field `invocation_kind` in json
     - Change the field `event_type` of the json into `resumed`
     - Calculate the current timestamp
@@ -56,17 +61,17 @@ This Powershell script should:
     - Log the json to the console
 
 - If `<event>` is `ai_tool_called`:
-    - Read the state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments.
+    - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
     - Increase the value of the field `signals.ai_tool_use_count` by one
     - Write the json back to the temp file above.
 
 - If `<event>` is `artifact_changed`:
-    - Read the state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments.
+    - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
     - Increase the value of the field `signals.artifact_change_count` by one
     - Write the json back to the temp file above.
 
 - If `<event>` is `completed`:
-    - Read the state file (json) named `<phase-id>.<spec-kit-phase>.json` in the temp directory of the current operating system, using values from the arguments.
+    - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
     - Assign new guid to the field `event_id` in json
     - Calculate the current timestamp
     - Calculate the duration in milliseconds by current timestamp minus the timestamp_utc in the json state file
