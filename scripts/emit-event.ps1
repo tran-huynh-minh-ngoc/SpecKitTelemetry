@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $sessionId = $env:SESSION_ID
-if ([string]::IsNullOrEmpty($sessionId) && [Console]::IsInputRedirected) {
+if ([string]::IsNullOrEmpty($sessionId) -and [Console]::IsInputRedirected) {
     $sessionId = ([Console]::In.ReadToEnd() | ConvertFrom-Json).session_id
 }
 if ([string]::IsNullOrEmpty($sessionId)) {

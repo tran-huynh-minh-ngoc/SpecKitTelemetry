@@ -5,7 +5,7 @@ This skill should be invoked automatically before or after a phase in Spec-kit. 
 If the skill is called before a phase starts, the event should be "started"; if the skill is called after a phase finishes, the event should be "completed".
 
 ## Execution
-Execute a Bash script:
+Execute a Bash script, the bash script must see the environment variables set in CLAUDE_ENV_FILE from SessionStart hook:
 ```
 bash .specify/extensions/telemetry/scripts/emit-event.sh <event> <phase-id> <work-item-id> <spec-kit-phase>
 ```
