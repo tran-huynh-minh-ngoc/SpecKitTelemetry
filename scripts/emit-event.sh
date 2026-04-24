@@ -111,6 +111,18 @@ elif [ "$event" = "artifact_changed" ]; then
     json=$(echo "$eventData" | jq -c '.')
     SaveStateFile "$json"
 
+elif [ "$event" = "error_occured" ]; then
+    eventData=$(cat "$stateFilePath")
+    startTimestamp=$(echo "$eventData" | jq -r '.timestamp_utc')
+    durationMs=$(( $(date -d "$currentTimestamp" +%s%3N) - $(date -d "$startTimestamp" +%s%3N) ))
+    eventData=$(echo "$eventData" | jq \
+        --arg event_id "$(uuidgen)" \
+        --arg timestamp_utc "$currentTimestamp" \
+        --argjson duration_ms "$durationMs" \
+        '.event_id = $event_id | .event_type = "error_occured" | .timestamp_utc = $timestamp_utc | .signals.duration_ms = $duration_ms')
+    ReportEvent "$eventData" false
+    DeleteStateFile
+
 elif [ "$event" = "completed" ]; then
     eventData=$(cat "$stateFilePath")
     startTimestamp=$(echo "$eventData" | jq -r '.timestamp_utc')

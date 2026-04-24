@@ -72,6 +72,18 @@ This Powershell script should:
     - Increase the value of the field `signals.artifact_change_count` by one
     - Write the json back to the temp file above.
 
+- If `<event>` is `error_occured`:
+    - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
+    - Assign new guid to the field `event_id` in json
+    - Calculate the current timestamp
+    - Calculate the duration in milliseconds by current timestamp minus the timestamp_utc in the json state file
+    - Change the field `event_type` of the json into `error_occured`
+    - Change the field `timestamp_utc` of the json into the calculated current timestamp above in ISO 8601 format in UTC, for example "2026-04-23T02:06:08Z"
+    - Set `signals.duration_ms` of the json to the duration value above.
+    - Append the json into a file named `report.jsonl` in a directory path named `{telemetryConfig.events_dir}/YYYY-MM` where `YYYY` is the current year and `MM` is the current month, the appended json has to be minified as a single line, if the file doesn't exist then create it.
+    - Log the json to the console
+    - Delete the temp file.
+
 - If `<event>` is `completed`:
     - Read the state file (json) named `SpecKitTelemetry.<session_id>.json` in the temp directory of the current operating system, using values from the arguments.
     - Assign new guid to the field `event_id` in json

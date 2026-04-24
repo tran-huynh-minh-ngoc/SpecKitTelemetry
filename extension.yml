@@ -1,16 +1,15 @@
 # https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-DEVELOPMENT-GUIDE.md
+
 schema_version: "1.0"
-# SDD Telemetry Extension manifest
-# Consumed by install.ps1 (and verified against .specify/extensions.yml).
-# See specs/POC-sdd-telemetry/contracts/hook-contract.md §Registration.
+requires:
+  speckit_version: ">=0.5.0"
 
 extension:
   id: "telemetry"
   name: telemetry
   version: 0.1.0
   description: Emits SDD phase lifecycle events with human-engagement signals.
-requires:
-  speckit_version: ">=0.5.0"
+
 provides:
   commands:
     - name: "speckit.telemetry.before-constitution"
@@ -90,15 +89,6 @@ provides:
       template: "config-template.yml"
       required: true
 
-# Hook entries below reference per-phase skill wrappers. Each wrapper is a
-# deterministic one-liner that shells to emit-event with baked-in args, so
-# the hook runtime can auto-invoke them without needing to pass arguments
-# through the EXECUTE_COMMAND protocol (which has none).
-#
-# optional: false (mandatory) so the spec-kit hook runtime auto-fires them.
-# The underlying emit-event script is fail-soft and always exits 0 (FR-010),
-# which preserves the additive-telemetry principle even when the hook itself
-# is mandatory at the runtime layer.
 hooks:
   before_constitution:
     command: speckit.telemetry.before-constitution

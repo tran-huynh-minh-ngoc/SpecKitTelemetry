@@ -50,7 +50,7 @@ function DeleteStateFile {
 }
 
 if ($event -eq "started") {
-    $eventData = @{
+    $eventData = [ordered]@{
         event_id = [guid]::NewGuid().ToString()
         phase_id = $phaseId
         work_item_id = $workItemId
@@ -60,7 +60,7 @@ if ($event -eq "started") {
         timestamp_utc = $currentTimestamp
         invocation_seq = 1
         invocation_kind = "initial"
-        signals = @{
+        signals = [ordered]@{
             duration_ms = 0
             ai_tool_use_count = 0
             user_turn_count = 0
@@ -71,14 +71,14 @@ if ($event -eq "started") {
     }
     ReportEvent $eventData
 } elseif ($event -eq "suspended") {
-    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.event_id = [guid]::NewGuid().ToString()
     $eventData.event_type = "suspended"
     $eventData.signals.duration_ms = [int](($currentTimestamp - $eventData.timestamp_utc).TotalMilliseconds)
     $eventData.timestamp_utc = $currentTimestamp
     ReportEvent $eventData
 } elseif ($event -eq "resumed") {
-    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.event_id = [guid]::NewGuid().ToString()
     $eventData.invocation_seq++
     $eventData.signals.user_turn_count++
@@ -88,17 +88,25 @@ if ($event -eq "started") {
     $eventData.timestamp_utc = $currentTimestamp
     ReportEvent $eventData
 } elseif ($event -eq "ai_tool_called") {
-    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.signals.ai_tool_use_count++
     $json = $eventData | ConvertTo-Json -Compress
     SaveStateFile $json
 } elseif ($event -eq "artifact_changed") {
-    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.signals.artifact_change_count++
     $json = $eventData | ConvertTo-Json -Compress
     SaveStateFile $json
+} elseif ($event -eq "error_occured") {
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
+    $eventData.event_id = [guid]::NewGuid().ToString()
+    $eventData.event_type = "error_occured"
+    $eventData.signals.duration_ms = [int](($currentTimestamp - $eventData.timestamp_utc).TotalMilliseconds)
+    $eventData.timestamp_utc = $currentTimestamp
+    ReportEvent $eventData false
+    DeleteStateFile
 } elseif ($event -eq "completed") {
-    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json
+    $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.event_id = [guid]::NewGuid().ToString()
     $eventData.event_type = "completed"
     $eventData.signals.duration_ms = [int](($currentTimestamp - $eventData.timestamp_utc).TotalMilliseconds)
