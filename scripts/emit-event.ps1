@@ -75,8 +75,8 @@ if ($event -eq "submitted") {
         $eventData.invocation_seq++
         $eventData.invocation_kind = "refinement"
         $eventData.timestamp_utc = $currentTimestamp
-        $eventData.ai_tool_use_count = 0
-        $eventData.artifact_change_count = 0
+        $eventData.metrics.ai_tool_use_count = 0
+        $eventData.metrics.artifact_change_count = 0
         ReportEvent $eventData
     }
     else {
