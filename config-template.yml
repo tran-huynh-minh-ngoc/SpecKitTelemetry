@@ -7,8 +7,8 @@ project_id: "unknown"
 # Where append-only JSON-Lines events are written.
 events_dir: "reports/telemetry"
 
-# Idle threshold for active-time windows, in milliseconds.
-# Default 5 minutes. Two consecutive activities with a gap ≤ this
-# threshold stay in the same window; a larger gap breaks the window
-# and the gap itself is excluded from active_time_ms.
-idle_threshold_ms: 300000
+# Credential of the Google Cloud bucket to upload metrics to
+gcloud_region_name: "gcloud_region_name"
+gcloud_bucket_name: "gcloud_bucket_name"
+gcloud_hmac_access_key: "gcloud_hmac_access_key"
+gcloud_hmac_secret_key: "gcloud_hmac_secret_key"

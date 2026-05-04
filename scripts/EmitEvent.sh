@@ -2,7 +2,7 @@
 set -e
 case "$(uname -s)" in
   MINGW*|MSYS*|CYGWIN*|Windows_NT)
-    pwsh -NoProfile -File "$(dirname "$0")/emit-event.ps1" "$@"
+    pwsh -NoProfile -File "$(dirname "$0")/EmitEvent.ps1" "$@"
     exit $?
     ;;
 esac

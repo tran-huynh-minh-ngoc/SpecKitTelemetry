@@ -17,7 +17,7 @@ uuidgen
 ## Execution
 Execute a Bash script, the bash script must see the environment variables set in CLAUDE_ENV_FILE from SessionStart hook:
 ```
-bash .specify/extensions/telemetry/scripts/emit-event.sh <event> <phase-id> <work-item-id> <spec-kit-phase>
+bash .specify/extensions/telemetry/scripts/EmitEvent.sh <event> <phase-id> <work-item-id> <spec-kit-phase>
 ```
 Definition of the arguments:
 - `<event>`: should be `started` or `completed`
