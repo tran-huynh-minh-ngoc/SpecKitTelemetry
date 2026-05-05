@@ -4,7 +4,7 @@ This skill should be invoked automatically at the start or the end of a phase in
 
 If the skill is called when a phase starts, the event should be "started"; if the skill is called when a phase finishes, the event should be "completed".
 
-To get a GUID on Windows, use this command in Powershell or preferably pwsh:
+To get a GUID on Windows, use this command in PowerShell:
 ```powershell
 (New-Guid).Guid
 ```
@@ -15,9 +15,9 @@ uuidgen
 ```
 
 ## Execution
-Execute a Bash script, the bash script must see the environment variables set in CLAUDE_ENV_FILE from SessionStart hook:
+Execute a Powershell script (using pwsh, even on non-Windows OSes), the script must see the environment variables set in CLAUDE_ENV_FILE from SessionStart hook:
 ```
-bash .specify/extensions/telemetry/scripts/EmitEvent.sh <event> <phase-id> <work-item-id> <spec-kit-phase>
+pwsh .specify/extensions/telemetry/scripts/EmitEvent.ps1 <event> <phase-id> <work-item-id> <spec-kit-phase>
 ```
 Definition of the arguments:
 - `<event>`: should be `started` or `completed`

@@ -1,3 +1,4 @@
+#Requires -Version 6.0
 param(
     [string]$event,
     [string]$phaseId,
@@ -16,21 +17,21 @@ $currentTimestamp = (Get-Date).ToUniversalTime()
 $reportDir = $telemetryConfig.events_dir
 $reportFilePath = Join-Path $reportDir ($currentTimestamp.ToString("yyyy-MM") + ".$sessionId.jsonl")
 
-function SaveStateFile($json) {
+function Save-StateFile($json) {
     $json | Out-File -FilePath $stateFilePath -Encoding UTF8 -Force
 }
 
-function ReportEvent($eventData, $saveState = $true) {
+function Write-Event($eventData, $saveState = $true) {
     New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
     $json = $eventData | ConvertTo-Json -Compress
     if ($saveState) {
-        SaveStateFile $json
+        Save-StateFile $json
     }
     Add-Content -Path $reportFilePath -Value $json -Encoding UTF8
     Write-Output $json
 }
 
-function DeleteStateFile {
+function Remove-StateFile {
     Remove-Item -Path $stateFilePath -Force
 }
 
@@ -66,11 +67,11 @@ if ($event -eq "submitted") {
         $eventData.timestamp_utc = $currentTimestamp
         $eventData.metrics.ai_tool_use_count = 0
         $eventData.metrics.artifact_change_count = 0
-        ReportEvent $eventData
+        Write-Event $eventData
     }
     else {
         $json = $eventData | ConvertTo-Json -Compress
-        SaveStateFile $json
+        Save-StateFile $json
     }
 }
 # event from Claude hook or equivalent
@@ -80,16 +81,17 @@ elseif ($event -eq "stopped") {
         $eventData.event_id = [guid]::NewGuid().ToString()
         $eventData.event_type = "suspended"
         $eventData.timestamp_utc = $currentTimestamp
-        ReportEvent $eventData
+        Write-Event $eventData
     }
     elseif ($eventData.phase -ne "" -and $eventData.event_type -eq "completed") {
         $eventData.event_id = [guid]::NewGuid().ToString()
         $eventData.timestamp_utc = $currentTimestamp
-        ReportEvent $eventData false
-        DeleteStateFile
+        Write-Event $eventData false
+        Remove-StateFile
+        & "$PSScriptRoot/UploadLog.ps1"
     }
     else {
-        DeleteStateFile
+        Remove-StateFile
     }
 }
 # spec-kit event
@@ -100,38 +102,38 @@ elseif ($event -eq "started") {
     $eventData.phase = $specKitPhase
     $eventData.work_item_id = $workItemId
     $eventData.event_type = "started"
-    ReportEvent $eventData
+    Write-Event $eventData
 }
 # spec-kit event
 elseif ($event -eq "completed") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.event_type = "completed"
     $json = $eventData | ConvertTo-Json -Compress
-    SaveStateFile $json
+    Save-StateFile $json
 }
 # event from Claude hook or equivalent
 elseif ($event -eq "ai_tool_called") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.metrics.ai_tool_use_count++
     $json = $eventData | ConvertTo-Json -Compress
-    SaveStateFile $json
+    Save-StateFile $json
 }
 # event from Claude hook or equivalent
 elseif ($event -eq "artifact_changed") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.metrics.artifact_change_count++
     $json = $eventData | ConvertTo-Json -Compress
-    SaveStateFile $json
+    Save-StateFile $json
 }
 # event from Claude hook or equivalent
 elseif ($event -eq "error_occured") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     if ($eventData.phase -eq "") {        
-        ReportEvent $eventData false
+        Write-Event $eventData false
     }
     $eventData.event_id = [guid]::NewGuid().ToString()
     $eventData.event_type = "error_occured"
     $eventData.timestamp_utc = $currentTimestamp
-    ReportEvent $eventData false
-    DeleteStateFile
+    Write-Event $eventData false
+    Remove-StateFile
 }

@@ -1,3 +1,4 @@
+#Requires -Version 3.0
 $ErrorActionPreference = "Stop"
 $session_id = ([Console]::In.ReadToEnd() | ConvertFrom-Json).session_id
 
