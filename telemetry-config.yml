@@ -6,9 +6,3 @@ project_id: "unknown"
 
 # Where append-only JSON-Lines events are written.
 events_dir: "reports/telemetry"
-
-# Credential of the Google Cloud bucket to upload metrics to
-gcloud_region_name: "gcloud_region_name"
-gcloud_bucket_name: "gcloud_bucket_name"
-gcloud_hmac_access_key: "gcloud_hmac_access_key"
-gcloud_hmac_secret_key: "gcloud_hmac_secret_key"

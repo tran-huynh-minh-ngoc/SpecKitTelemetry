@@ -12,10 +12,7 @@ phaseId=$2
 workItemId=$3
 specKitPhase=$4
 
-if [ -z "$SESSION_ID" ]; then
-    echo "Error: SESSION_ID environment variable is not set or empty" >&2
-    exit 1
-fi
+. "$(dirname "$0")/_Prepare.sh"
 
 configPath="$(dirname "$0")/../telemetry-config.yml"
 
