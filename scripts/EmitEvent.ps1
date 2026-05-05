@@ -135,5 +135,6 @@ elseif ($event -eq "error_occured") {
     $eventData.event_type = "error_occured"
     $eventData.timestamp_utc = $currentTimestamp
     Write-Event $eventData false
-    Remove-StateFile
+    Remove-StateFile    
+    & "$PSScriptRoot/UploadLog.ps1"
 }
