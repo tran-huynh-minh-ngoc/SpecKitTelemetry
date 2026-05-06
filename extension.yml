@@ -14,75 +14,75 @@ provides:
   commands:
     - name: "speckit.telemetry.before-constitution"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for constitution
+      description: Emit SDD "started" event for Spec Kit "constitution" command
       
     - name: "speckit.telemetry.after-constitution"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for constitution
+      description: Emit SDD "completed" event for Spec Kit "constitution" command
       
     - name: "speckit.telemetry.before-specify"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for specify
+      description: Emit SDD "started" event for Spec Kit "specify" command
       
     - name: "speckit.telemetry.after-specify"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for specify
+      description: Emit SDD "completed" event for Spec Kit "specify" command
       
     - name: "speckit.telemetry.before-clarify"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for clarify
+      description: Emit SDD "started" event for Spec Kit "clarify" command
       
     - name: "speckit.telemetry.after-clarify"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for clarify
+      description: Emit SDD "completed" event for Spec Kit "clarify" command
       
     - name: "speckit.telemetry.before-plan"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for plan
+      description: Emit SDD "started" event for Spec Kit "plan" command
       
     - name: "speckit.telemetry.after-plan"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for plan
+      description: Emit SDD "completed" event for Spec Kit "plan" command
       
     - name: "speckit.telemetry.before-tasks"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for tasks
+      description: Emit SDD "started" event for Spec Kit "tasks" command
       
     - name: "speckit.telemetry.after-tasks"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for tasks
+      description: Emit SDD "completed" event for Spec Kit "tasks" command
       
     - name: "speckit.telemetry.before-implement"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for implement
+      description: Emit SDD "started" event for Spec Kit "implement" command
       
     - name: "speckit.telemetry.after-implement"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for implement
+      description: Emit SDD "completed" event for Spec Kit "implement" command
       
     - name: "speckit.telemetry.before-checklist"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for checklist
+      description: Emit SDD "started" event for Spec Kit "checklist" command
       
     - name: "speckit.telemetry.after-checklist"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for checklist
+      description: Emit SDD "completed" event for Spec Kit "checklist" command
       
     - name: "speckit.telemetry.before-analyze"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for analyze
+      description: Emit SDD "started" event for Spec Kit "analyze" command
       
     - name: "speckit.telemetry.after-analyze"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for analyze
+      description: Emit SDD "completed" event for Spec Kit "analyze" command
       
     - name: "speckit.telemetry.before-taskstoissues"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "started" event for taskstoissues
+      description: Emit SDD "started" event for Spec Kit "taskstoissues" command
       
     - name: "speckit.telemetry.after-taskstoissues"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for taskstoissues
+      description: Emit SDD "completed" event for Spec Kit "taskstoissues" command
 
   config:
     - name: "telemetry-config.yml"
@@ -93,88 +93,90 @@ hooks:
   before_constitution:
     command: speckit.telemetry.before-constitution
     optional: false
+    description: Emit SDD "started" event for Spec Kit "constitution" command
 
   after_constitution:
     command: speckit.telemetry.after-constitution
     optional: false
+    description: Emit SDD "started" event for Spec Kit "constitution" command
 
   before_specify:
     command: speckit.telemetry.before-specify
     optional: false
-    description: Emit SDD telemetry "started" event for specify
+    description: Emit SDD "started" event for Spec Kit "specify" command
 
   after_specify:
     command: speckit.telemetry.after-specify
     optional: false
-    description: Emit SDD telemetry "completed" event for specify
+    description: Emit SDD "completed" event for Spec Kit "specify" command
 
   before_clarify:
     command: speckit.telemetry.before-clarify
     optional: false
-    description: Emit SDD telemetry "started" event for clarify
+    description: Emit SDD "started" event for Spec Kit "clarify" command
 
   after_clarify:
     command: speckit.telemetry.after-clarify
     optional: false
-    description: Emit SDD telemetry "completed" event for clarify
+    description: Emit SDD "completed" event for Spec Kit "clarify" command
 
   before_plan:
     command: speckit.telemetry.before-plan
     optional: false
-    description: Emit SDD telemetry "started" event for plan
+    description: Emit SDD "started" event for Spec Kit "plan" command
 
   after_plan:
     command: speckit.telemetry.after-plan
     optional: false
-    description: Emit SDD telemetry "completed" event for plan
+    description: Emit SDD "completed" event for Spec Kit "plan" command
 
   before_tasks:
     command: speckit.telemetry.before-tasks
     optional: false
-    description: Emit SDD telemetry "started" event for tasks
+    description: Emit SDD "started" event for Spec Kit "tasks" command
 
   after_tasks:
     command: speckit.telemetry.after-tasks
     optional: false
-    description: Emit SDD telemetry "completed" event for tasks
+    description: Emit SDD "completed" event for Spec Kit "tasks" command
 
   before_implement:
     command: speckit.telemetry.before-implement
     optional: false
-    description: Emit SDD telemetry "started" event for implement
+    description: Emit SDD "started" event for Spec Kit "implement" command
 
   after_implement:
     command: speckit.telemetry.after-implement
     optional: false
-    description: Emit SDD telemetry "completed" event for implement
+    description: Emit SDD "completed" event for Spec Kit "implement" command
 
   before_checklist:
     command: speckit.telemetry.before-checklist
     optional: false
-    description: Emit SDD telemetry "started" event for checklist
+    description: Emit SDD "started" event for Spec Kit "checklist" command
 
   after_checklist:
     command: speckit.telemetry.after-checklist
     optional: false
-    description: Emit SDD telemetry "completed" event for checklist
+    description: Emit SDD "completed" event for Spec Kit "checklist" command
 
   before_analyze:
     command: speckit.telemetry.before-analyze
     optional: false
-    description: Emit SDD telemetry "started" event for analyze
+    description: Emit SDD "started" event for Spec Kit "analyze" command
 
   after_analyze:
     command: speckit.telemetry.after-analyze
     optional: false
-    description: Emit SDD telemetry "completed" event for analyze
+    description: Emit SDD "completed" event for Spec Kit "analyze" command
 
   before_taskstoissues:
     command: speckit.telemetry.before-taskstoissues
     optional: false
-    description: Emit SDD telemetry "started" event for taskstoissues
+    description: Emit SDD "started" event for Spec Kit "taskstoissues" command
 
   after_taskstoissues:
     command: speckit.telemetry.after-taskstoissues
     optional: false
-    description: Emit SDD telemetry "completed" event for taskstoissues
+    description: Emit SDD "completed" event for Spec Kit "taskstoissues" command
 

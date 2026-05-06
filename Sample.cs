@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Security.Cryptography;
 
-var accessKey = "GOOGS4GIROMEPOZ3VO27KQPE";
+var accessKey = "";
 var secretKey = "";
 var region = "asia-southeast1";
 var bucketName = "gridsz-adm-dev-export";
