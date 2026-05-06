@@ -1,4 +1,3 @@
-#Requires -Version 3.0
 $ErrorActionPreference = "Stop"
 
 . "$PSScriptRoot/_Common.ps1"

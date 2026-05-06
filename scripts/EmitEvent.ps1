@@ -1,6 +1,5 @@
-#Requires -Version 6.0
 param(
-    [string]$event,
+    [string]$eventName,
     [string]$phaseId,
     [string]$workItemId,
     [string]$specKitPhase
@@ -35,25 +34,32 @@ function Remove-StateFile {
     Remove-Item -Path $stateFilePath -Force
 }
 
+if ($eventName -eq "started") {
+    Write-ToChat "Event `"$eventName`" was emitted (phaseId: $phaseId, workItemId: $workItemId, specKitPhase: $specKitPhase)."
+}
+else {
+    Write-ToChat "Event `"$eventName`" was emitted."
+}
+
 # event from Claude hook or equivalent
-if ($event -eq "submitted") {
+if ($eventName -eq "submitted") {
     try {
         $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     }
     catch [System.Management.Automation.ItemNotFoundException] {
         $eventData = [ordered]@{
-            event_id = ""
-            event_type = ""
-            span_id = [guid]::NewGuid().ToString()
-            phase_id = ""
-            phase = ""
-            work_item_id = ""
-            project_id = $telemetryConfig.project_id
-            timestamp_utc = $currentTimestamp
-            invocation_seq = 0
+            event_id        = ""
+            event_type      = ""
+            span_id         = [guid]::NewGuid().ToString()
+            phase_id        = ""
+            phase           = ""
+            work_item_id    = ""
+            project_id      = $telemetryConfig.project_id
+            timestamp_utc   = $currentTimestamp
+            invocation_seq  = 0
             invocation_kind = "initial"
-            metrics = [ordered]@{
-                ai_tool_use_count = 0
+            metrics         = [ordered]@{
+                ai_tool_use_count     = 0
                 artifact_change_count = 0
             }
         }
@@ -75,7 +81,7 @@ if ($event -eq "submitted") {
     }
 }
 # event from Claude hook or equivalent
-elseif ($event -eq "stopped") {
+elseif ($eventName -eq "stopped") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     if ($eventData.phase -ne "" -and $eventData.event_type -ne "completed") {
         $eventData.event_id = [guid]::NewGuid().ToString()
@@ -95,7 +101,7 @@ elseif ($event -eq "stopped") {
     }
 }
 # spec-kit event
-elseif ($event -eq "started") {
+elseif ($eventName -eq "started") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.event_id = [guid]::NewGuid().ToString()
     $eventData.phase_id = $phaseId
@@ -105,28 +111,28 @@ elseif ($event -eq "started") {
     Write-Event $eventData
 }
 # spec-kit event
-elseif ($event -eq "completed") {
+elseif ($eventName -eq "completed") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.event_type = "completed"
     $json = $eventData | ConvertTo-Json -Compress
     Save-StateFile $json
 }
 # event from Claude hook or equivalent
-elseif ($event -eq "ai_tool_called") {
+elseif ($eventName -eq "ai_tool_called") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.metrics.ai_tool_use_count++
     $json = $eventData | ConvertTo-Json -Compress
     Save-StateFile $json
 }
 # event from Claude hook or equivalent
-elseif ($event -eq "artifact_changed") {
+elseif ($eventName -eq "artifact_changed") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     $eventData.metrics.artifact_change_count++
     $json = $eventData | ConvertTo-Json -Compress
     Save-StateFile $json
 }
 # event from Claude hook or equivalent
-elseif ($event -eq "error_occured") {
+elseif ($eventName -eq "error_occured") {
     $eventData = Get-Content -Path $stateFilePath -Raw | ConvertFrom-Json -AsHashtable
     if ($eventData.phase -eq "") {        
         Write-Event $eventData false
@@ -138,5 +144,3 @@ elseif ($event -eq "error_occured") {
     Remove-StateFile    
     & "$PSScriptRoot/UploadLog.ps1"
 }
-
-Write-ToChat "Event ""$event"" was emitted."

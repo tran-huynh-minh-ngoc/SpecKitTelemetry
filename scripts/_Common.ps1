@@ -1,8 +1,10 @@
-#Requires -Version 3.0
 $ErrorActionPreference = "Stop"
 
-$messagesForChat = New-Object System.Collections.Generic.List[string]
+if ([Console]::IsInputRedirected -and -not $env:DEBUG_ON) {
+    $PSStyle.OutputRendering = [System.Management.Automation.OutputRendering]::PlainText
+}
 
+$messagesForChat = New-Object System.Collections.Generic.List[string]
 function Write-ToChat([string]$message) {
     if ($env:DEBUG_ON) {
         Write-Host $message
@@ -12,9 +14,9 @@ function Write-ToChat([string]$message) {
     }
 }
 
-if (-not $env:DEBUG_ON) {    
+if (-not $env:DEBUG_ON) {
     Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
-        if ($Error.Count -eq 0) {
+        if ($global:error.Count -eq 0) {
             Write-Host (@{systemMessage = $messagesForChat -join "`n" } | ConvertTo-Json)
         }
     } | Out-Null

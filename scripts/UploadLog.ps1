@@ -1,4 +1,3 @@
-#Requires -Version 7.1
 using namespace System.Globalization
 using namespace System.IO
 using namespace System.Net.Http
@@ -14,15 +13,16 @@ $reportDir = $telemetryConfig.events_dir
 $projectId = $telemetryConfig.project_id
 $matchingFiles = @(Get-ChildItem -Path $reportDir -Filter "*.$sessionId.jsonl")
 if ($matchingFiles.Count -eq 0) {
-    Write-Host "Error: No log file found matching pattern '*.$sessionId.jsonl' in $reportDir"
+    Write-ToChat "Error: No log file found matching pattern '*.$sessionId.jsonl' in $reportDir"
     exit 0
 }
 if ($matchingFiles.Count -gt 1) {
-    Write-Host "Warning: Multiple log files found. Using the first one."
+    Write-ToChat "Warning: Multiple log files found. Using the first one."
 }
 $filePath = $matchingFiles[0].FullName
 
-$endpointUrl = "https://storage.googleapis.com"
+$domain = "storage.googleapis.com";
+$endpointUrl = "https://$domain"
 $regionName = $env:GCLOUD_REGION_NAME
 $bucketName = $env:GCLOUD_BUCKET_NAME
 $accessKey = $env:GCLOUD_HMAC_ACCESS_KEY
@@ -93,15 +93,15 @@ function New-Signature([string]$StringToSign, [byte[]]$SecretKey) {
 $absolutePath = "/$bucketName/$objectName"
 $canonicalQueryParams = @{}
 $client = [HttpClient]::new()
-$url = "https://storage.googleapis.com$absolutePath"
+$url = "$endpointUrl$absolutePath"
 $credentialStr = "$accessKey/$($timestamp.ToString("yyyyMMdd", [CultureInfo]::InvariantCulture))/$regionName/s3/aws4_request"
 $emptyPayloadHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 
 #region HEAD request
 $headCanonicalHeaders = @{
-    "host" = "storage.googleapis.com"
+    "host"                 = $domain
     "x-amz-content-sha256" = $emptyPayloadHash
-    "x-amz-date" = $timestamp.ToString("yyyyMMddTHHmmssZ", [CultureInfo]::InvariantCulture)
+    "x-amz-date"           = $timestamp.ToString("yyyyMMddTHHmmssZ", [CultureInfo]::InvariantCulture)
 }
 $headCanonicalRequest = New-CanonicalRequest "HEAD" $absolutePath $canonicalQueryParams $headCanonicalHeaders $emptyPayloadHash
 $headStringToSign = New-StringToSign $headCanonicalRequest $timestamp $regionName
@@ -122,15 +122,18 @@ if ($headResponse.StatusCode -eq 200) {
         $remoteLastModified = [DateTime]::Parse($lastModifiedValues[0]).ToUniversalTime()
         $localLastModified = (Get-Item $filePath).LastWriteTime.ToUniversalTime()
         if ($localLastModified -lt $remoteLastModified) {
-            Write-Host "Local log file is unchanged. Skipping upload."
+            Write-ToChat "Local log file is unchanged. Skipping upload."
             exit 0
         }
-    } else {
-        Write-Host "Remote log file exists but Last-Modified header is missing. Proceeding with upload."
     }
-} elseif ($headResponse.StatusCode -eq 404) {
-    Write-Host "Remote log file is not available. Proceed to upload."
-} else {
+    else {
+        Write-ToChat "Remote log file exists but Last-Modified header is missing. Proceeding with upload."
+    }
+}
+elseif ($headResponse.StatusCode -eq 404) {
+    Write-ToChat "No remote log file. Proceed to upload."
+}
+else {
     $headResponse.EnsureSuccessStatusCode() | Out-Null
 }
 #endregion
@@ -140,9 +143,9 @@ $localFileStream = [File]::Open($filePath, [FileMode]::Open, [FileAccess]::Read,
 $payloadHash = ([SHA256]::Create().ComputeHash($localFileStream) | ForEach-Object { "{0:x2}" -f $_ }) -join ""
 $null = $localFileStream.Seek(0, [SeekOrigin]::Begin)
 $canonicalHeaders = @{
-    "host" = "storage.googleapis.com"
+    "host"                 = $domain
     "x-amz-content-sha256" = $payloadHash
-    "x-amz-date" = $timestamp.ToString("yyyyMMddTHHmmssZ", [CultureInfo]::InvariantCulture)
+    "x-amz-date"           = $timestamp.ToString("yyyyMMddTHHmmssZ", [CultureInfo]::InvariantCulture)
 }
 $canonicalRequest = New-CanonicalRequest "PUT" $absolutePath $canonicalQueryParams $canonicalHeaders $payloadHash
 $stringToSign = New-StringToSign $canonicalRequest $timestamp $regionName
@@ -161,4 +164,4 @@ $response = $client.Send($putRequest)
 $response.EnsureSuccessStatusCode() | Out-Null
 #endregion
 
-Write-Host "Log file uploaded successfully to gs://$bucketName/$objectName"
+Write-ToChat "Log file uploaded successfully to gs://$bucketName/$objectName"
