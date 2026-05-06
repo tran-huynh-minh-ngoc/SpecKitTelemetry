@@ -22,7 +22,7 @@ provides:
       
     - name: "speckit.telemetry.before-specify"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for specify
+      description: Emit SDD telemetry "started" event for specify
       
     - name: "speckit.telemetry.after-specify"
       file: "commands/emit.md"
@@ -30,7 +30,7 @@ provides:
       
     - name: "speckit.telemetry.before-clarify"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for clarify
+      description: Emit SDD telemetry "started" event for clarify
       
     - name: "speckit.telemetry.after-clarify"
       file: "commands/emit.md"
@@ -38,7 +38,7 @@ provides:
       
     - name: "speckit.telemetry.before-plan"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for plan
+      description: Emit SDD telemetry "started" event for plan
       
     - name: "speckit.telemetry.after-plan"
       file: "commands/emit.md"
@@ -46,7 +46,7 @@ provides:
       
     - name: "speckit.telemetry.before-tasks"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for tasks
+      description: Emit SDD telemetry "started" event for tasks
       
     - name: "speckit.telemetry.after-tasks"
       file: "commands/emit.md"
@@ -54,7 +54,7 @@ provides:
       
     - name: "speckit.telemetry.before-implement"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for implement
+      description: Emit SDD telemetry "started" event for implement
       
     - name: "speckit.telemetry.after-implement"
       file: "commands/emit.md"
@@ -62,7 +62,7 @@ provides:
       
     - name: "speckit.telemetry.before-checklist"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for checklist
+      description: Emit SDD telemetry "started" event for checklist
       
     - name: "speckit.telemetry.after-checklist"
       file: "commands/emit.md"
@@ -70,7 +70,7 @@ provides:
       
     - name: "speckit.telemetry.before-analyze"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for analyze
+      description: Emit SDD telemetry "started" event for analyze
       
     - name: "speckit.telemetry.after-analyze"
       file: "commands/emit.md"
@@ -78,7 +78,7 @@ provides:
       
     - name: "speckit.telemetry.before-taskstoissues"
       file: "commands/emit.md"
-      description: Emit SDD telemetry "completed" event for taskstoissues
+      description: Emit SDD telemetry "started" event for taskstoissues
       
     - name: "speckit.telemetry.after-taskstoissues"
       file: "commands/emit.md"
