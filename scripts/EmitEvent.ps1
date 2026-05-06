@@ -138,3 +138,5 @@ elseif ($event -eq "error_occured") {
     Remove-StateFile    
     & "$PSScriptRoot/UploadLog.ps1"
 }
+
+Write-ToChat "Event ""$event"" was emitted."
